@@ -28,3 +28,11 @@ src/data/raw/
 
 *postgres_data/*
 *.log*
+
+# Model files (too large for git)
+*.pkl
+*.h5
+*.pb
+*.onnx
+src/models/*.pkl
+models/

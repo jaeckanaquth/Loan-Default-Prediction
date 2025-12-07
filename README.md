@@ -219,3 +219,4 @@ Access the MLflow UI at `http://localhost:5000`
 - Prediction logs are written to `predictions.log` for monitoring purposes
 - The project uses sklearn Pipelines to ensure preprocessing consistency
 - MLflow integration is optional but recommended for experiment tracking
+- **Model files are not included in the repository** - you'll need to train the model locally or download it separately. The model will be saved to `src/models/model_rf.pkl` after training.
