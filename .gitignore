@@ -1,21 +1,63 @@
+# Python
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
 .pytest_cache/
+*.egg-info/
+dist/
+build/
+
+# Environment
 .env
+.venv
+venv/
+ENV/
+
+# Data and models
+src/data/processed/
+src/data/raw/
+*.pkl
+*.h5
+*.pb
+*.onnx
+models/
 mlruns/
+mlflow.db
+
+# Infrastructure
 .terraform/
 terraform.tfstate
 terraform.tfstate.backup
+*.tfvars
 docker-compose.override.yml
-src/data/processed/
-src/data/raw/
+minio_data/
+postgres_data/
+registry_data/
 
-*.bat
-*__pycache__*
-*__pycache__
-*__pycache__
-*__pycache__
+# Logs
+*.log
+*.log.*
 
-*__init__.py
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Anaconda
+anaconda_projects/
+
+# Archives
 *.zip
 *.tar.gz
 *.tar.bz2
@@ -23,16 +65,16 @@ src/data/raw/
 *.tar.lzma
 *.tar.lz
 *.tar.zst
-*.tar.zstd
-*.tar.zstd
 
-*postgres_data/*
-*.log*
-
-# Model files (too large for git)
-*.pkl
-*.h5
-*.pb
-*.onnx
-src/models/*.pkl
-models/
+*.bat
+*.sh
+*.ps1
+*.cmd
+*.exe
+*.dll
+*.lib
+*.obj
+*.pdb
+*.exp
+*.lib
+*.def
