@@ -14,3 +14,4 @@ requests
 pytest-cov
 flake8
 black
+python-pptx

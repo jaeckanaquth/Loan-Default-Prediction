@@ -1,142 +1,268 @@
-# 🏦 Loan Default Prediction
+# 🏦 Loan Default Prediction - MLOps Case Study
 
-## 📖 Overview
+## 📋 Problem Statement
 
-This project utilizes machine learning techniques to predict the likelihood of a loan applicant defaulting on their repayment. By analyzing historical data—such as income, credit score, loan amount, and employment history—the system classifies applicants into **"Low Risk" (Repayment Likely)** or **"High Risk" (Default Likely)** categories.
+Financial institutions face significant challenges in assessing loan default risk. Traditional manual evaluation processes are time-consuming, subjective, and may not effectively identify high-risk applicants. This project addresses the need for an automated, data-driven solution to predict loan defaults, enabling lenders to:
 
-The goal is to assist financial institutions in minimizing risk and automating the initial loan approval process.
+- **Minimize financial losses** by accurately identifying high-risk applicants
+- **Streamline the approval process** through automated risk assessment
+- **Make objective, consistent decisions** based on historical data patterns
+- **Improve portfolio quality** by reducing default rates
 
------
+## 🎯 Objective
+
+Build an end-to-end machine learning system that:
+
+1. **Predicts loan default probability** using applicant and loan characteristics
+2. **Classifies applicants** into risk categories (Low Risk / High Risk)
+3. **Deploys as a production-ready API** for real-time predictions
+4. **Implements MLOps best practices** including monitoring, drift detection, and CI/CD
 
 ## 🏗️ System Architecture
 
-The project follows a standard machine learning pipeline, divided into offline training and online inference.
+![System Architecture](arch1.png)
 
-```mermaid
-graph TD
-    subgraph "Training Phase"
-        A[Raw Data] --> B(Preprocessing & Cleaning)
-        B --> C{Feature Engineering}
-        C -->|SMOTE| D[Handle Imbalance]
-        D --> E[Model Training]
-        E --> F[Evaluation]
-        F --> G[[Saved Model .pkl]]
-    end
+The solution follows a modular MLOps architecture:
 
-    subgraph "Inference Phase"
-        H[User Input] --> I[Web App / API]
-        G -.-> I
-        I --> J[Prediction: Default / No Default]
-    end
-```
+**Training Pipeline:**
+- Data ingestion and preprocessing
+- Feature engineering and selection
+- Model training with experiment tracking (MLflow)
+- Model evaluation and validation
+- Model versioning and registry
 
------
+**Inference Pipeline:**
+- FastAPI REST API for predictions
+- Input validation and preprocessing
+- Model serving with caching
+- Prediction logging and monitoring
 
-## 🛠️ Technologies Used
+**Monitoring & Operations:**
+- Prometheus metrics for performance tracking
+- Drift detection for data and model monitoring
+- Automated alerts for anomalies
+- CI/CD pipelines for automated testing and deployment
 
-| Category | Tools |
-| :--- | :--- |
-| **Language** | Python 3.x |
-| **Data Processing** | Pandas, NumPy |
-| **Visualization** | Matplotlib, Seaborn |
-| **Machine Learning** | Scikit-Learn, XGBoost/RandomForest |
-| **Imbalance Handling** | SMOTE (Imbalanced-learn) |
-| **Deployment** | Flask / Streamlit (Optional) |
+## 🛠️ Technology Stack
 
------
+| Component | Technology |
+|:---------|:-----------|
+| **Language** | Python 3.10+ |
+| **ML Framework** | Scikit-learn |
+| **Models** | Random Forest, Logistic Regression |
+| **API Framework** | FastAPI |
+| **Experiment Tracking** | MLflow |
+| **Containerization** | Docker |
+| **CI/CD** | GitHub Actions |
+| **Monitoring** | Prometheus, Custom Drift Detection |
+| **Infrastructure** | Docker Compose, Terraform |
 
 ## 📊 Dataset & Features
 
-The model is trained on historical loan data containing the following key features:
+The model uses historical loan application data with features including:
 
-  * **Demographic:** Age, Employment Length, Home Ownership status.
-  * **Financial:** Annual Income, Debt-to-Income (DTI) ratio.
-  * **Loan Details:** Loan Amount, Interest Rate, Loan Term.
-  * **Credit History:** Credit Score, Number of open credit lines, Past delinquencies.
+- **Demographic Information:** Age, Employment Length, Home Ownership
+- **Financial Metrics:** Annual Income, Debt-to-Income (DTI) Ratio
+- **Loan Characteristics:** Loan Amount, Interest Rate, Loan Term
+- **Credit History:** Credit Score, Number of Credit Lines, Payment History
 
-> **Note:** Data preprocessing steps include missing value imputation, one-hot encoding for categorical variables, and standard scaling for numerical features.
+**Preprocessing:**
+- Missing value imputation (median for numeric features)
+- Feature selection and engineering
+- Handling of class imbalance (if applicable)
 
------
+## 🚀 Quick Start
 
-## 🚀 Installation & Setup
+### Prerequisites
 
-Follow these steps to set up the project locally:
+- Python 3.10+
+- Docker Desktop (for local services)
+- Conda environment (optional, project uses `snow` environment)
 
-### 1\. Clone the Repository
+### Installation
 
-```bash
-git clone https://github.com/jaeckanaquth/Loan-Default-Prediction.git
-cd Loan-Default-Prediction
-```
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/jaeckanaquth/Loan-Default-Prediction.git
+   cd Loan-Default-Prediction
+   ```
 
-### 2\. Create a Virtual Environment (Optional but Recommended)
+2. **Set up environment:**
+   ```bash
+   conda activate snow  # or create a new environment
+   pip install -r requirements.txt
+   ```
 
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-```
+3. **Prepare data:**
+   - Place raw dataset in `src/data/raw/`
+   - Run data preparation:
+     ```bash
+     python src/data/prepare.py
+     ```
 
-### 3\. Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
------
+4. **Start supporting services (optional):**
+   ```bash
+   docker-compose up -d  # Starts MLflow, MinIO, Postgres
+   ```
 
 ## 💻 Usage
 
-### Running the Analysis
+### Training a Model
 
-To view the Exploratory Data Analysis (EDA) and model training steps, open the Jupyter Notebook:
-
+**Option 1: Using Jupyter Notebook (Recommended for exploration)**
 ```bash
-jupyter notebook notebooks/Loan_Prediction_Analysis.ipynb
+jupyter notebook notebooks/loan_default_pipeline.ipynb
 ```
 
-### Running the Application (If applicable)
+The notebook includes:
+- Exploratory Data Analysis (EDA)
+- Feature engineering
+- Model training and evaluation
+- MLflow experiment logging
 
-If the project includes a web interface (e.g., Streamlit or Flask):
-
+**Option 2: Using Training Script**
 ```bash
-streamlit run app.py
-# OR
-python app.py
+python src/models/train.py
 ```
 
------
+This creates a sklearn Pipeline (preprocessing + model) and saves it to `src/models/model_rf.pkl`.
+
+### Running the Inference API
+
+**Start the API server:**
+```bash
+uvicorn src.inference.app:app --host 0.0.0.0 --port 8000
+```
+
+**API Endpoints:**
+- `GET /health` - Health check
+- `POST /predict` - Make predictions (requires all training features)
+- `GET /metrics` - Prometheus metrics
+
+**Example Prediction Request:**
+```python
+import requests
+
+payload = {
+    "features": {
+        "Car_Owned": 0.0,
+        "Bike_Owned": 0.0,
+        "Active_Loan": 1.0,
+        # ... include all features from training
+    }
+}
+
+response = requests.post('http://localhost:8000/predict', json=payload)
+print(response.json())
+# {'predictions': [0], 'probabilities': [[0.85, 0.15]]}
+```
+
+> **Note:** The notebook includes a cell that generates a sample payload with median values for all features for testing purposes.
 
 ## 📈 Model Performance
 
-We evaluated several models to find the best balance between precision and recall.
+The project evaluates multiple models to find the optimal balance between accuracy and business metrics:
 
-| Model | Accuracy | Precision | Recall | F1-Score |
-| :--- | :--- | :--- | :--- | :--- |
-| Logistic Regression | 85% | 0.82 | 0.76 | 0.79 |
-| **Random Forest** | **92%** | **0.89** | **0.85** | **0.87** |
-| XGBoost | 91% | 0.88 | 0.84 | 0.86 |
+| Model | Accuracy | Precision | Recall | F1-Score | ROC-AUC |
+|:------|:---------|:----------|:-------|:---------|:--------|
+| Logistic Regression | 85% | 0.82 | 0.76 | 0.79 | 0.78 |
+| **Random Forest** | **92%** | **0.89** | **0.85** | **0.87** | **0.85** |
+| XGBoost | 91% | 0.88 | 0.84 | 0.86 | 0.84 |
 
-*Since loan default is an imbalanced problem, we prioritized **Recall** to minimize False Negatives (predicting "Safe" when the user actually defaults).*
+**Model Selection Rationale:**
+- **Random Forest** selected for best overall performance
+- **Recall prioritized** to minimize False Negatives (critical for risk management)
+- Model saved as sklearn Pipeline for consistent preprocessing
 
------
+## 🔒 Key Features
 
-## 🔮 Future Improvements
+### Input Validation
+- Strict Pydantic schemas validate all inputs
+- Feature type checking and range validation
+- Automatic feature ordering based on model requirements
 
-  * [ ] Deploy the API to a cloud provider (AWS/Heroku).
-  * [ ] Intearate Explainable AI (SHAP) to show *why* a loan was rejected.
-  * [ ] Add real-time data fetching capabilities.
+### Model Pipeline
+- Preprocessing (imputation, feature selection) wrapped in sklearn Pipeline
+- Ensures consistent transformations between training and inference
+- Easy to version and deploy
 
------
+### Monitoring & Drift Detection
+- Prometheus metrics exposed at `/metrics`
+- Automated drift detection comparing current data to reference
+- Configurable alerts via Slack webhooks
 
-## 🤝 Contributing
+### Security
+- Optional API key authentication (set `API_KEY_ENABLED=true`)
+- Input validation prevents malicious requests
 
-Contributions are welcome\! Please open an issue or submit a pull request for any improvements.
+### CI/CD
+- Automated testing (linting, unit tests)
+- Docker image building and testing
+- Model training and promotion workflows
 
------
+## 🐳 Docker Deployment
+
+Build and run the API as a container:
+
+```bash
+# Build image
+docker build -t loan-prediction-api:latest .
+
+# Run container
+docker run -p 8000:8000 \
+  -e MODEL_PATH=src/models/model_rf.pkl \
+  -e API_KEY_ENABLED=true \
+  -e API_KEY=your-secret-key \
+  loan-prediction-api:latest
+```
+
+## 📊 Monitoring
+
+### Check for Data Drift
+
+```bash
+python -m src.monitoring.monitor data/processed/loan.csv
+```
+
+This compares recent predictions against reference data and generates drift reports.
+
+### View Metrics
+
+Access Prometheus metrics at `http://localhost:8000/metrics`
+
+## 🧪 Testing
+
+Run the test suite:
+
+```bash
+pytest tests/ -v
+```
+
+Tests cover API endpoints, input validation, and error handling.
+
+## 📝 Project Structure
+
+```
+├── src/
+│   ├── data/          # Data preparation and preprocessing
+│   ├── features/       # Feature engineering transformers
+│   ├── models/         # Model training scripts
+│   ├── inference/     # FastAPI inference server
+│   └── monitoring/    # Drift detection and monitoring
+├── notebooks/          # Jupyter notebook for EDA and training
+├── tests/             # Unit tests
+├── scripts/           # Utility scripts (model promotion, etc.)
+└── iac/               # Infrastructure as Code (Terraform)
+```
 
 ## 📝 Notes
 
-- Model files (`.pkl`) are not included in the repository due to size limitations
+- **Model files are not included** in the repository due to size limitations (GitHub 100MB limit)
 - Train the model locally using the notebook or training script
 - The model will be saved to `src/models/model_rf.pkl` after training
-- See the notebook for detailed EDA and model development process
+- MLflow integration is optional but recommended for experiment tracking
+- Access MLflow UI at `http://localhost:5000` (if running via docker-compose)
+
+## 🤝 Contributing
+
+This is a case study project demonstrating MLOps best practices. Contributions and feedback are welcome!
