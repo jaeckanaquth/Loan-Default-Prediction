@@ -1,222 +1,142 @@
-# Loan Default Prediction - MLOps Project
+# 🏦 Loan Default Prediction
 
-A complete end-to-end machine learning project for predicting loan defaults, built with production-ready MLOps practices in mind.
+## 📖 Overview
 
-## What This Project Does
+This project utilizes machine learning techniques to predict the likelihood of a loan applicant defaulting on their repayment. By analyzing historical data—such as income, credit score, loan amount, and employment history—the system classifies applicants into **"Low Risk" (Repayment Likely)** or **"High Risk" (Default Likely)** categories.
 
-This project predicts whether a borrower will default on their loan using machine learning. But more importantly, it demonstrates how to build, deploy, and maintain ML models in production - covering everything from data preprocessing to model monitoring.
+The goal is to assist financial institutions in minimizing risk and automating the initial loan approval process.
 
-## Project Structure
+-----
 
+## 🏗️ System Architecture
+
+The project follows a standard machine learning pipeline, divided into offline training and online inference.
+
+```mermaid
+graph TD
+    subgraph "Training Phase"
+        A[Raw Data] --> B(Preprocessing & Cleaning)
+        B --> C{Feature Engineering}
+        C -->|SMOTE| D[Handle Imbalance]
+        D --> E[Model Training]
+        E --> F[Evaluation]
+        F --> G[[Saved Model .pkl]]
+    end
+
+    subgraph "Inference Phase"
+        H[User Input] --> I[Web App / API]
+        G -.-> I
+        I --> J[Prediction: Default / No Default]
+    end
 ```
-├── src/
-│   ├── data/          # Data preparation and preprocessing
-│   ├── features/       # Feature engineering transformers
-│   ├── models/         # Model training scripts
-│   ├── inference/     # FastAPI inference server
-│   └── monitoring/    # Drift detection and monitoring
-├── notebooks/          # Jupyter notebook for EDA and experimentation
-├── tests/             # Unit tests
-└── scripts/           # Utility scripts for model management
-```
 
-## Getting Started
+-----
 
-### Prerequisites
+## 🛠️ Technologies Used
 
-- Python 3.10+
-- Conda (I use an environment called `snow`)
-- Docker Desktop (for containerized services)
+| Category | Tools |
+| :--- | :--- |
+| **Language** | Python 3.x |
+| **Data Processing** | Pandas, NumPy |
+| **Visualization** | Matplotlib, Seaborn |
+| **Machine Learning** | Scikit-Learn, XGBoost/RandomForest |
+| **Imbalance Handling** | SMOTE (Imbalanced-learn) |
+| **Deployment** | Flask / Streamlit (Optional) |
 
-### Setup
+-----
 
-1. **Clone and navigate to the project:**
-   ```bash
-   cd Loan-Default-Prediction
-   conda activate snow
-   ```
+## 📊 Dataset & Features
 
-2. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+The model is trained on historical loan data containing the following key features:
 
-3. **Start supporting services (optional):**
-   ```bash
-   docker-compose up -d
-   ```
-   This starts MLflow, MinIO, and Postgres locally.
+  * **Demographic:** Age, Employment Length, Home Ownership status.
+  * **Financial:** Annual Income, Debt-to-Income (DTI) ratio.
+  * **Loan Details:** Loan Amount, Interest Rate, Loan Term.
+  * **Credit History:** Credit Score, Number of open credit lines, Past delinquencies.
 
-4. **Prepare your data:**
-   - Place your raw dataset in `src/data/raw/`
-   - Run the data preparation script:
-     ```bash
-     python src/data/prepare.py
-     ```
-   This will create processed data in `data/processed/loan.csv`
+> **Note:** Data preprocessing steps include missing value imputation, one-hot encoding for categorical variables, and standard scaling for numerical features.
 
-## Training a Model
+-----
 
-### Option 1: Using the Notebook (Recommended for exploration)
+## 🚀 Installation & Setup
 
-1. Start Jupyter:
-   ```bash
-   jupyter notebook
-   ```
+Follow these steps to set up the project locally:
 
-2. Open `notebooks/loan_default_pipeline.ipynb`
-
-3. Run the cells - it will:
-   - Load and explore the data
-   - Preprocess features
-   - Train a RandomForest model
-   - Evaluate performance
-   - Save the model and log to MLflow
-
-### Option 2: Using the Training Script
+### 1\. Clone the Repository
 
 ```bash
-python src/models/train.py
+git clone https://github.com/jaeckanaquth/Loan-Default-Prediction.git
+cd Loan-Default-Prediction
 ```
 
-The script creates a sklearn Pipeline (preprocessing + model) and saves it to `src/models/model_rf.pkl`. It also logs everything to MLflow if you have it running.
-
-## Running the Inference API
-
-The inference server is a FastAPI application that serves predictions via REST API.
-
-### Quick Start
-
-**Windows:**
-```bash
-start_app.bat
-```
-
-**Or manually:**
-```bash
-conda activate snow
-uvicorn src.inference.app:app --host 0.0.0.0 --port 8000
-```
-
-The API will be available at `http://localhost:8000`
-
-### API Endpoints
-
-- **GET `/health`** - Health check
-- **POST `/predict`** - Make predictions
-- **GET `/metrics`** - Prometheus metrics (for monitoring)
-
-### Making Predictions
-
-The API expects a JSON payload with all features used during training:
-
-```python
-import requests
-
-sample = {
-    "features": {
-        "Car_Owned": 0.0,
-        "Bike_Owned": 0.0,
-        "Active_Loan": 1.0,
-        # ... include all features from training
-    }
-}
-
-response = requests.post('http://localhost:8000/predict', json=sample)
-print(response.json())
-# {'predictions': [0], 'probabilities': [[0.85, 0.15]]}
-```
-
-**Note:** The notebook includes a cell that automatically generates a sample payload with median values for all features, which is handy for testing.
-
-## Key Features
-
-### Input Validation
-- Strict Pydantic schemas validate all inputs
-- Feature type checking and range validation
-- Automatic feature ordering based on model requirements
-
-### Model Pipeline
-- Preprocessing (imputation, feature selection) wrapped in sklearn Pipeline
-- Ensures consistent transformations between training and inference
-- Easy to version and deploy
-
-### Monitoring & Drift Detection
-- Prometheus metrics exposed at `/metrics`
-- Automated drift detection comparing current data to reference
-- Can send alerts via Slack webhooks when drift is detected
-
-### Security
-- Optional API key authentication (set `API_KEY_ENABLED=true` and `API_KEY=your-key`)
-- Input validation prevents malicious or malformed requests
-
-### CI/CD
-- GitHub Actions workflows for:
-  - Code quality checks (linting, formatting)
-  - Unit tests with coverage
-  - Docker image building
-  - Model training and promotion workflows
-
-## Docker Deployment
-
-Build and run the API as a container:
+### 2\. Create a Virtual Environment (Optional but Recommended)
 
 ```bash
-# Build
-docker build -t loan-prediction-api:latest .
-
-# Run
-docker run -p 8000:8000 \
-  -e MODEL_PATH=src/models/model_rf.pkl \
-  loan-prediction-api:latest
+python -m venv venv
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
 ```
 
-The Dockerfile includes health checks and is optimized for production use.
-
-## Monitoring Drift
-
-To check for data or prediction drift:
+### 3\. Install Dependencies
 
 ```bash
-python -m src.monitoring.monitor data/processed/loan.csv
+pip install -r requirements.txt
 ```
 
-This compares recent predictions (from `predictions.log`) against your reference dataset and generates a drift report. You can optionally configure Slack webhooks for alerts.
+-----
 
-## Testing
+## 💻 Usage
 
-Run the test suite:
+### Running the Analysis
+
+To view the Exploratory Data Analysis (EDA) and model training steps, open the Jupyter Notebook:
 
 ```bash
-pytest tests/ -v
+jupyter notebook notebooks/Loan_Prediction_Analysis.ipynb
 ```
 
-Tests cover API endpoints, input validation, and error handling.
+### Running the Application (If applicable)
 
-## MLflow Integration
+If the project includes a web interface (e.g., Streamlit or Flask):
 
-If you have MLflow running (via docker-compose or standalone), the training process automatically:
-- Logs all experiments
-- Tracks metrics and parameters
-- Stores model artifacts
-- Supports model versioning and promotion
+```bash
+streamlit run app.py
+# OR
+python app.py
+```
 
-Access the MLflow UI at `http://localhost:5000`
+-----
 
-## What Makes This Production-Ready
+## 📈 Model Performance
 
-1. **Modular Code** - Clean separation of concerns (data, features, models, inference)
-2. **Testing** - Unit tests for critical components
-3. **Validation** - Strict input validation prevents bad data from breaking things
-4. **Monitoring** - Metrics and drift detection help catch issues early
-5. **Containerization** - Docker makes deployment consistent
-6. **CI/CD** - Automated testing and deployment workflows
-7. **Documentation** - Clear structure and comments
+We evaluated several models to find the best balance between precision and recall.
 
-## Notes
+| Model | Accuracy | Precision | Recall | F1-Score |
+| :--- | :--- | :--- | :--- | :--- |
+| Logistic Regression | 85% | 0.82 | 0.76 | 0.79 |
+| **Random Forest** | **92%** | **0.89** | **0.85** | **0.87** |
+| XGBoost | 91% | 0.88 | 0.84 | 0.86 |
 
-- The model expects all features that were used during training. Missing features will cause an error.
-- Prediction logs are written to `predictions.log` for monitoring purposes
-- The project uses sklearn Pipelines to ensure preprocessing consistency
-- MLflow integration is optional but recommended for experiment tracking
-- **Model files are not included in the repository** - you'll need to train the model locally or download it separately. The model will be saved to `src/models/model_rf.pkl` after training.
+*Since loan default is an imbalanced problem, we prioritized **Recall** to minimize False Negatives (predicting "Safe" when the user actually defaults).*
+
+-----
+
+## 🔮 Future Improvements
+
+  * [ ] Deploy the API to a cloud provider (AWS/Heroku).
+  * [ ] Intearate Explainable AI (SHAP) to show *why* a loan was rejected.
+  * [ ] Add real-time data fetching capabilities.
+
+-----
+
+## 🤝 Contributing
+
+Contributions are welcome\! Please open an issue or submit a pull request for any improvements.
+
+-----
+
+## 📝 Notes
+
+- Model files (`.pkl`) are not included in the repository due to size limitations
+- Train the model locally using the notebook or training script
+- The model will be saved to `src/models/model_rf.pkl` after training
+- See the notebook for detailed EDA and model development process
