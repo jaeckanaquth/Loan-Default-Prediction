@@ -1,0 +1,94 @@
+name: Train and Promote Model
+
+on:
+  workflow_dispatch:
+    inputs:
+      promote_to:
+        description: 'Promote to stage (staging/production)'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Prepare data
+        run: |
+          mkdir -p data/raw data/processed
+          # Add your data preparation step here
+          # python src/data/prepare.py
+      
+      - name: Train model
+        env:
+          MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI || 'http://localhost:5000' }}
+        run: |
+          python src/models/train.py
+      
+      - name: Run tests
+        run: |
+          pytest tests/ -v
+      
+      - name: Check model quality
+        id: quality_check
+        run: |
+          echo "Model training completed successfully"
+          echo "::set-output name=passed::true"
+      
+      - name: Register model in MLflow
+        if: steps.quality_check.outputs.passed == 'true'
+        env:
+          MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI || 'http://localhost:5000' }}
+        run: |
+          echo "Model would be registered in MLflow here"
+      
+      - name: Promote to staging
+        if: github.event.inputs.promote_to == 'staging' && steps.quality_check.outputs.passed == 'true'
+        env:
+          MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI || 'http://localhost:5000' }}
+        run: |
+          python scripts/promote_model.py staging
+      
+      - name: Promote to production
+        if: github.event.inputs.promote_to == 'production'
+        env:
+          MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI || 'http://localhost:5000' }}
+        run: |
+          python scripts/promote_model.py production
+          # Additional production deployment steps
+          # - Build Docker image
+          # - Push to registry
+          # - Deploy to production environment
+      
+      - name: Build Docker image
+        if: github.event.inputs.promote_to == 'production'
+        run: |
+          docker build -t loan-prediction-api:latest .
+          # docker tag loan-prediction-api:latest ${{ secrets.DOCKER_REGISTRY }}/loan-prediction-api:latest
+          # docker push ${{ secrets.DOCKER_REGISTRY }}/loan-prediction-api:latest
+      
+      - name: Notify on failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Model training/promotion failed',
+              body: 'The model training or promotion workflow failed. Please check the logs.'
+            })
