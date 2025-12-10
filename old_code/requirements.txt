@@ -1,0 +1,17 @@
+pandas
+scikit-learn
+mlflow
+fastapi
+uvicorn
+boto3
+python-dotenv
+pytest
+httpx
+pydantic>=2.0
+prometheus-client
+scipy
+requests
+pytest-cov
+flake8
+black
+python-pptx

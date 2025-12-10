@@ -1,0 +1,52 @@
+services:
+  localstack:
+    image: localstack/localstack:1.4
+    environment:
+      - SERVICES=s3,ecs,ecr,iam,secretsmanager
+      - DEBUG=1
+      - DATA_DIR=/tmp/localstack/data
+    ports:
+      - "4566:4566"
+      - "4571:4571"
+    volumes:
+      - "./localstack_data:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+  minio:
+    image: minio/minio:RELEASE.2024-10-13T13-34-11Z
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data
+    ports:
+      - "9000:9000"
+    volumes:
+      - "./minio_data:/data"
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: mlflow
+      POSTGRES_PASSWORD: mlflow
+      POSTGRES_DB: mlflow_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - "./postgres_data:/var/lib/postgresql/data"
+  mlflow:
+    image: python:3.9-slim
+    command: >
+      sh -c "pip install --no-cache-dir mlflow psycopg2-binary boto3 &&
+             mlflow server --host 0.0.0.0 --port 5000 
+             --backend-store-uri file:///mlruns
+             --default-artifact-root file:///mlruns"
+    ports:
+      - "5000:5000"
+    volumes:
+      - "./mlruns:/mlruns"
+    depends_on:
+      - postgres
+  registry:
+    image: registry:2
+    ports:
+      - "5001:5000"
+    volumes:
+      - "./registry_data:/var/lib/registry"

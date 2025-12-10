@@ -1,80 +1,11 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-.pytest_cache/
-*.egg-info/
-dist/
-build/
-
-# Environment
-.env
-.venv
-venv/
-ENV/
-
-# Data and models
-src/data/processed/
-src/data/raw/
-*.pkl
-*.h5
-*.pb
-*.onnx
-models/
 mlruns/
-mlflow.db
+data/models/
+*.pkl
+*.joblib
 
-# Infrastructure
-.terraform/
-terraform.tfstate
-terraform.tfstate.backup
-*.tfvars
-docker-compose.override.yml
-minio_data/
-postgres_data/
-registry_data/
-
-# Logs
-*.log
-*.log.*
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Jupyter
-.ipynb_checkpoints/
+*.ipynb_checkpoints/
 *.ipynb_checkpoints
 
-# Anaconda
-anaconda_projects/
-
-# Archives
-*.zip
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.lzma
-*.tar.lz
-*.tar.zst
-
-*.bat
-*.sh
-*.ps1
-*.cmd
-*.exe
-*.dll
-*.lib
-*.obj
-*.pdb
-*.exp
-*.lib
-*.def
+example.json
+*.log
+*.db
